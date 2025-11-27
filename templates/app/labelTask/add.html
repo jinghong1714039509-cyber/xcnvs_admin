@@ -1,0 +1,186 @@
+{% extends "app/base_site.html" %}
+
+{% block title %} 新建病例任务 {% endblock title %}
+
+{% block content %}
+<style>
+    /* 医疗平台专属样式 */
+    .medical-card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 5px 25px rgba(0,0,0,0.05);
+        border-top: 5px solid #27ae60; /* 医疗绿 */
+        padding: 40px 50px;
+        margin-top: 10px;
+        min-height: 600px;
+    }
+    
+    .page-header-custom {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+    .page-header-custom h3 {
+        margin: 0;
+        color: #2c3e50;
+        font-weight: 700;
+        font-size: 26px;
+    }
+    
+    /* 上传框样式 */
+    .upload-zone-wrapper {
+        position: relative;
+        width: 100%;
+        height: 200px;
+        background: #fff;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+    
+    /* 真正的 input，透明覆盖 */
+    .upload-zone-wrapper input[type="file"] {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        opacity: 0 !important; 
+        cursor: pointer;
+        z-index: 100;
+    }
+
+    /* 视觉层 */
+    .upload-zone-visual {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        border: 2px dashed #bdc3c7;
+        border-radius: 8px;
+        background: #f9fbfc;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        transition: all 0.3s;
+    }
+    
+    .upload-zone-wrapper:hover .upload-zone-visual {
+        border-color: #27ae60;
+        background: #f0fff4;
+        transform: scale(1.01);
+    }
+
+    .upload-icon { font-size: 48px; margin-bottom: 15px; color: #bdc3c7; }
+    .upload-title { font-size: 18px; font-weight: bold; color: #34495e; }
+    .upload-desc { font-size: 13px; color: #95a5a6; margin-top: 5px; }
+
+    /* 文件名显示 */
+    .file-name-display {
+        margin-top: 15px;
+        padding: 5px 15px;
+        background: #27ae60;
+        color: white;
+        border-radius: 20px;
+        font-size: 13px;
+        display: none; 
+    }
+
+    .form-control-lg { height: 50px !important; font-size: 16px; background: #fdfdfd; }
+    .btn-submit {
+        background-color: #27ae60;
+        border: none;
+        padding: 12px 60px;
+        font-size: 18px;
+        border-radius: 4px;
+        color: white;
+        margin-top: 20px;
+        font-weight: bold;
+    }
+    .btn-submit:hover { background-color: #219150; }
+</style>
+
+<div class="right_col" role="main" style="background-color: #f0f3f6; min-height: 100vh;">
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2 col-sm-12 col-xs-12">
+            
+            <div class="medical-card">
+                <div class="page-header-custom">
+                    <h3><i class="fa fa-user-md" style="color:#27ae60;"></i> 新建病例任务 <small>A端 (医院) 数据上传通道</small></h3>
+                </div>
+
+                <form id="upload-form" method="post" action="/labelTask/add" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="form-group" style="margin-bottom: 25px;">
+                        <label style="font-size:15px; font-weight:bold; color:#333;">任务/患者名称 <span style="color:red">*</span></label>
+                        <input type="text" name="name" required="required" class="form-control form-control-lg" 
+                               placeholder="请输入患者姓名或编号 (例如: 张三_20231126)">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 30px;">
+                        <label style="font-size:15px; font-weight:bold; color:#333;">病情备注</label>
+                        <textarea name="remark" class="form-control" rows="2" 
+                                  style="resize:vertical; padding:15px;" 
+                                  placeholder="在此填写病情描述、诊断意见等..."></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <label style="color:#d9534f; font-weight:bold; font-size:15px; margin-bottom:10px; display:block;"><i class="fa fa-lock"></i> 病例文件 (加密)</label>
+                            <div class="upload-zone-wrapper">
+                                <input type="file" name="patient_file" onchange="showFile(this, 'visual-patient')">
+                                <div class="upload-zone-visual" id="visual-patient">
+                                    <div class="upload-icon"><i class="fa fa-file-text-o"></i></div>
+                                    <div class="upload-title">点击上传病例</div>
+                                    <div class="upload-desc">支持 PDF, Word, TXT</div>
+                                    <div class="file-name-display"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <label style="color:#337ab7; font-weight:bold; font-size:15px; margin-bottom:10px; display:block;"><i class="fa fa-film"></i> 视频源 (抽帧)</label>
+                            <div class="upload-zone-wrapper">
+                                <input type="file" name="video_file" required="required" accept="video/*" onchange="showFile(this, 'visual-video')">
+                                <div class="upload-zone-visual" id="visual-video" style="border-color:#a6c7e6; background:#f4faff;">
+                                    <div class="upload-icon" style="color:#3498db;"><i class="fa fa-video-camera"></i></div>
+                                    <div class="upload-title">点击上传视频</div>
+                                    <div class="upload-desc">支持 MP4, AVI (系统按30fps处理)</div>
+                                    <div class="file-name-display" style="background:#337ab7;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-right">
+                        <a href="/labelTask/index" class="btn btn-default btn-lg" style="margin-right: 15px; border:none; margin-top:20px;">取消</a>
+                        <button type="submit" class="btn-submit" id="submit-btn">
+                            <i class="fa fa-cloud-upload"></i> 立即提交
+                        </button>
+                    </div>
+                </form>
+                
+                <div id="loading-mask" style="display:none; text-align:center; margin-top:30px; padding:20px; background:#fcfcfc; border-radius:8px;">
+                    <i class="fa fa-spinner fa-spin fa-3x" style="color:#27ae60;"></i>
+                    <h4 style="margin-top:15px; color:#333; font-weight:bold;">正在加密数据并处理视频...</h4>
+                    <p class="text-muted">请耐心等待，不要关闭页面</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showFile(input, visualId) {
+        if (input.files && input.files[0]) {
+            var name = input.files[0].name;
+            var $visual = $('#' + visualId);
+            $visual.find('.upload-icon, .upload-title, .upload-desc').hide();
+            $visual.find('.file-name-display').html('<i class="fa fa-check-circle"></i> ' + name).fadeIn();
+            $visual.css('border-style', 'solid').css('background', '#f0fff4');
+        }
+    }
+    $('#upload-form').submit(function() {
+        $('#submit-btn').attr('disabled', true).text('处理中...');
+        $('#loading-mask').slideDown();
+    });
+</script>
+{% endblock content %}

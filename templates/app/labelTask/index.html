@@ -1,0 +1,89 @@
+{% extends "app/base_site.html" %}
+
+{% block title %} 控制面板 {% endblock title %}
+
+{% block content %}
+<style>
+    /* 首页专属样式 */
+    .role-card {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        padding: 40px;
+        text-align: center;
+        transition: transform 0.3s;
+        border-top: 5px solid #ccc;
+        height: 100%;
+    }
+    .role-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    /* A端卡片配色 */
+    .card-a { border-top-color: #337ab7; }
+    .card-a .icon-circle { background: #eaf2f8; color: #337ab7; }
+    
+    /* B端卡片配色 */
+    .card-b { border-top-color: #27ae60; }
+    .card-b .icon-circle { background: #e9f7ef; color: #27ae60; }
+
+    .icon-circle {
+        width: 80px; height: 80px;
+        border-radius: 50%;
+        line-height: 80px;
+        font-size: 36px;
+        margin: 0 auto 20px;
+    }
+    
+    .role-title { font-size: 24px; font-weight: bold; color: #34495e; margin-bottom: 10px; }
+    .role-desc { color: #95a5a6; font-size: 14px; margin-bottom: 30px; height: 40px; }
+    
+    .btn-role {
+        padding: 12px 40px;
+        font-size: 16px;
+        border-radius: 30px;
+        font-weight: bold;
+        width: 80%;
+    }
+</style>
+
+<div class="right_col" role="main" style="background-color: #f0f3f6; min-height: 90vh;">
+  
+  <div class="page-title">
+    <div class="title_left">
+      <h3><i class="fa fa-dashboard"></i> 控制面板</h3>
+    </div>
+  </div>
+  <div class="clearfix"></div>
+
+  <div class="row" style="margin-top: 40px;">
+      
+      <div class="col-md-5 col-md-offset-1 col-sm-6 col-xs-12">
+          <div class="role-card card-a">
+              <div class="icon-circle"><i class="fa fa-user-md"></i></div>
+              <div class="role-title">医院端 (A端)</div>
+              <div class="role-desc">负责上传病例文件、视频源，并监控自动抽帧进度。</div>
+              
+              <a href="/labelTask/add" class="btn btn-primary btn-role">
+                  <i class="fa fa-plus"></i> 新建任务
+              </a>
+              <br><br>
+              <a href="/labelTask/index" style="color: #337ab7;">查看历史任务 &rarr;</a>
+          </div>
+      </div>
+
+      <div class="col-md-5 col-sm-6 col-xs-12">
+          <div class="role-card card-b">
+              <div class="icon-circle"><i class="fa fa-pencil-square-o"></i></div>
+              <div class="role-title">标注端 (B端)</div>
+              <div class="role-desc">负责下载脱敏后的图片包，并上传标注结果文件。</div>
+              
+              <a href="/labelTask/index" class="btn btn-success btn-role">
+                  <i class="fa fa-folder-open"></i> 进入工作台
+              </a>
+          </div>
+      </div>
+
+  </div>
+</div>
+{% endblock content %}

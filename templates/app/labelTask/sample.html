@@ -1,0 +1,37 @@
+{% extends "app/base_site.html" %}
+{% block title %} 样本浏览 {% endblock title %}
+{% block content %}
+<div class="right_col" role="main">
+  <div class="">
+    <div class="page-title">
+      <div class="title_left"><h3>样本库 <small>{{ task_code }}</small></h3></div>
+      <div class="title_right">
+          <div class="pull-right">
+            <a href="/storage/download?type=images&code={{ task_code }}" class="btn btn-success" target="_blank">下载ZIP</a>
+            <button class="btn btn-primary" onclick="$('#uploadModal').modal('show')">上传标注</button>
+            <a href="/labelTask/index" class="btn btn-default">返回</a>
+          </div>
+      </div>
+    </div>
+    <div class="clearfix"></div>
+    <div class="row"><div class="col-md-12"><div class="x_panel"><div class="x_content" id="image-grid"></div></div></div></div>
+  </div>
+</div>
+<div class="modal fade" id="uploadModal" tabindex="-1" role="dialog"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal"><span>&times;</span></button><h4 class="modal-title">上传标注 (ZIP)</h4></div><div class="modal-body"><form id="upForm" action="/labeltkSample/postBatchAnnotation" method="post" enctype="multipart/form-data">{% csrf_token %}<input type="hidden" name="task_code" value="{{ task_code }}"><input type="file" name="annotation_file" required class="form-control"></form></div><div class="modal-footer"><button type="button" class="btn btn-primary" onclick="$('#upForm').submit()">上传</button></div></div></div></div>
+<script>
+    $(document).ready(function() {
+        $.ajax({
+            url: "/labeltkSample/getIndex", type: "GET", data: { "task_code": "{{ task_code }}", "ps": 50 },
+            success: function(res) {
+                if(res.code === 1000 && res.data.length > 0) {
+                    var html = "";
+                    $.each(res.data, function(i, item) {
+                        html += '<div class="col-md-2" style="margin-bottom:15px;"><div class="thumbnail"><img src="/static/'+item.new_filename+'" style="height:150px;width:100%;object-fit:cover;"><div class="caption text-center"><small>'+item.old_filename+'</small></div></div></div>';
+                    });
+                    $("#image-grid").html(html);
+                } else { $("#image-grid").html("<div class='alert alert-warning'>暂无数据</div>"); }
+            }
+        });
+    });
+</script>
+{% endblock content %}
